@@ -1,8 +1,9 @@
 const express = require('express');
-const http = require('http');
+const https = require('https');
 const socketIo = require('socket.io');
 const mediasoup = require('mediasoup');
 const cors = require('cors')
+const fs = require('fs')
 
 const app = express();
 const corsOptions = {
@@ -14,7 +15,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
-const server = http.createServer(app);
+const server = https.createServer({
+  key: fs.readFileSync('server.key'),  // chemin vers votre clé
+  cert: fs.readFileSync('server.cert')  // chemin vers votre certificat
+}, app);
 // const io = socketIo(server);
 const io = socketIo(server, {
   cors: {
@@ -93,7 +97,7 @@ io.on('connection', (socket) => {
 
         socket.on('consume', async (callback) => {
             const consumerTransport = await router.createWebRtcTransport({
-                listenIps: [{ ip: '0.0.0.0', announcedIp: 'YOUR_PUBLIC_IP' }],
+                listenIps: [{ ip: '0.0.0.0', announcedIp: '192.168.88.4' }],
                 enableUdp: true,
                 enableTcp: true,
                 preferUdp: true,
@@ -105,7 +109,7 @@ io.on('connection', (socket) => {
                 return callback({ error: 'No producers found' });
             }
 
-            const consumer = await consumerTransport.consume({
+            const consumer = await consumerTransport.cons ume({
                 producerId: producer.id,
                 rtpCapabilities: router.rtpCapabilities,
                 paused: false,
@@ -125,5 +129,5 @@ io.on('connection', (socket) => {
 // const baseUrl = window.location.protocol + '//' + window.location.hostname + ':4400'
 
 server.listen(4400,'0.0.0.0', () => {
-    console.log('Server is running on http://192.168.88.4:4400');
+    console.log('Server is running on https://192.168.88.4:4400');
 });
