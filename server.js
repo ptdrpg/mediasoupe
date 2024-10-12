@@ -109,7 +109,7 @@ io.on('connection', (socket) => {
                 return callback({ error: 'No producers found' });
             }
 
-            const consumer = await consumerTransport.cons ume({
+            const consumer = await consumerTransport.consume({
                 producerId: producer.id,
                 rtpCapabilities: router.rtpCapabilities,
                 paused: false,
